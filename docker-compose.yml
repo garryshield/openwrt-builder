@@ -1,0 +1,12 @@
+services:
+  debian:
+    build:
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    tty: true
+    volumes:
+      - ./:/usr/src/app
