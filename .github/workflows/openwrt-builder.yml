@@ -31,3 +31,4 @@ jobs:
         run: |
           git clone --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} ./code/${TAGS_NAME}
           echo $PWD
+          ls -al
