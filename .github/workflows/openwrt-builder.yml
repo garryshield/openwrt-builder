@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
 
-      - name: Initialization environment
+      - name: Init environment
         run: |
           sudo apt update -y
           sudo apt full-upgrade -y
@@ -34,7 +34,11 @@ jobs:
           env
           pwd
           date
+          lscpu
+          free -ht
           df -hT
+          uname -a
+          cat /etc/os-release
 
       - name: Clone code
         run: |
@@ -64,8 +68,8 @@ jobs:
           cd ./code/${REPO_NAME}
           make -j$(nproc) V=s || make -j1 V=s
 
-      - name: Upload firmware directory
+      - name: Upload
         uses: actions/upload-artifact@main
         with:
-          name: ${REPO_NAME}-${REPO_BRANCH}-${DATE}
-          path: ./code/${REPO_NAME}/bin
+          name: ${{env.REPO_NAME}}-${{env.REPO_BRANCH}}-${{env.DATE}}
+          path: ./code/${{env.REPO_NAME}}/bin
