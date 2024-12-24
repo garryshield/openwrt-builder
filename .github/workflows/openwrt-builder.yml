@@ -29,8 +29,8 @@ jobs:
           uname -a
           cat /etc/os-release
 
-      # - name: Checkout
-      #   uses: actions/checkout@main
+      - name: Checkout
+        uses: actions/checkout@main
 
       # - name: Init Environment
       #   run: |
