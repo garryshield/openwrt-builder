@@ -42,17 +42,17 @@ jobs:
           
       - name: Update feeds
         run: ｜
-          cd ./code/${REPO_NAME} 
+          cd ./code/${REPO_NAME}
           ./scripts/feeds update -a
 
       - name: Install feeds
         run: ｜
-          cd ./code/${REPO_NAME} 
+          cd ./code/${REPO_NAME}
           ./scripts/feeds install -a
 
       - name: Download package
         run: |
-          cd ./code/${REPO_NAME} 
+          cd ./code/${REPO_NAME}
           make defconfig
           make download -j$(nproc)
           
