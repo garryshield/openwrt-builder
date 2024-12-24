@@ -10,66 +10,71 @@ jobs:
       REPO_NAME: "openwrt"
       REPO_URL: "https://github.com/openwrt/openwrt"
       REPO_BRANCH: "master"
-      DATE: $(date +%Y-%m-%d-%H:%M)
+      DATE: ""
 
     runs-on: ubuntu-24.04
     steps:
+      - name: Setup Env
+        run: |
+          echo "DATE=$(date +%Y-%m-%d-%H:%M)" >> ${{env.GITHUB_ENV}}
+
       - name: Checkout
         uses: actions/checkout@main
 
-      - name: Init environment
-        run: |
-          sudo apt update -y
-          sudo apt full-upgrade -y
-          sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-          bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gettext gcc-multilib g++-multilib \
-          git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
-          libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libncurses-dev libpython3-dev libreadline-dev \
-          libssl-dev libtool llvm lrzsz genisoimage msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
-          python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
-          uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+      # - name: Init environment
+      #   run: |
+      #     sudo apt update -y
+      #     sudo apt full-upgrade -y
+      #     sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+      #     bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gettext gcc-multilib g++-multilib \
+      #     git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
+      #     libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libncurses-dev libpython3-dev libreadline-dev \
+      #     libssl-dev libtool llvm lrzsz genisoimage msmtp ninja-build p7zip p7zip-full patch pkgconf python3 \
+      #     python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
+      #     uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
-      - name: Environment info
-        run: |
-          env
-          pwd
-          date
-          lscpu
-          free -ht
-          df -hT
-          uname -a
-          cat /etc/os-release
+      # - name: Environment info
+      #   run: |
+      #     env
+      #     pwd
+      #     date
+      #     lscpu
+      #     free -ht
+      #     df -hT
+      #     uname -a
+      #     cat /etc/os-release
 
-      - name: Clone code
-        run: |
-          pwd
-          git clone --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} ./code/${REPO_NAME}
+      # - name: Clone code
+      #   run: |
+      #     pwd
+      #     git clone --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} ./code/${REPO_NAME}
           
-      - name: Update feeds
-        run: |
-          pwd
-          ls -la
-          cd ./code/${REPO_NAME}
-          ./scripts/feeds update -a
+      # - name: Update feeds
+      #   run: |
+      #     pwd
+      #     ls -la
+      #     cd ./code/${REPO_NAME}
+      #     ./scripts/feeds update -a
 
-      - name: Install feeds
-        run: |
-          cd ./code/${REPO_NAME}
-          ./scripts/feeds install -a
+      # - name: Install feeds
+      #   run: |
+      #     cd ./code/${REPO_NAME}
+      #     ./scripts/feeds install -a
 
-      - name: Config && Download
-        run: |
-          cd ./code/${REPO_NAME}
-          make defconfig
-          make download -j$(nproc)
+      # - name: Config && Download
+      #   run: |
+      #     cd ./code/${REPO_NAME}
+      #     make defconfig
+      #     make download -j$(nproc)
           
-      - name: Compile
-        run: |
-          cd ./code/${REPO_NAME}
-          make -j$(nproc) V=s || make -j1 V=s
+      # - name: Compile
+      #   run: |
+      #     cd ./code/${REPO_NAME}
+      #     make -j$(nproc) V=s || make -j1 V=s
 
       - name: Upload
         uses: actions/upload-artifact@main
         with:
           name: ${{env.REPO_NAME}}-${{env.REPO_BRANCH}}-${{env.DATE}}
-          path: ./code/${{env.REPO_NAME}}/bin
+          # path: ./code/${{env.REPO_NAME}}/bin
+          path: ./scripts
