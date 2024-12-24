@@ -28,7 +28,7 @@ jobs:
           python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
           uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
-      - name: Info
+      - name: Environment info
         run: |
           env
           pwd
