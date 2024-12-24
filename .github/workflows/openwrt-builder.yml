@@ -10,6 +10,7 @@ jobs:
       REPO_NAME: "openwrt"
       REPO_URL: "https://github.com/openwrt/openwrt"
       REPO_BRANCH: "master"
+      DATE: $(date +%Y-%m-%d-%H:%M)
 
     runs-on: ubuntu-24.04
     steps:
@@ -66,5 +67,5 @@ jobs:
       - name: Upload firmware directory
         uses: actions/upload-artifact@main
         with:
-          name: ${REPO_NAME}${REPO_BRANCH}
+          name: ${REPO_NAME}-${REPO_BRANCH}-${DATE}
           path: ./code/${REPO_NAME}/bin
