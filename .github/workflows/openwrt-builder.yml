@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Setup Env
         run: |
-          echo "DATE=$(date +%Y-%m-%d-%H:%M)" >> ${{env.GITHUB_ENV}}
+          echo "DATE=$(date +%Y-%m-%d-%H:%M)" >> ${GITHUB_ENV}
 
       - name: Checkout
         uses: actions/checkout@main
