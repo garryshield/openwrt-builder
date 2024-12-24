@@ -41,7 +41,7 @@ jobs:
           git clone --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} ./code/${REPO_NAME}
           
       - name: Update feeds
-        run: ｜
+        run: |
           pwd
           ls -la
           cd ./code/${REPO_NAME}
