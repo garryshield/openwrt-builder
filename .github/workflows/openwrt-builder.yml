@@ -72,6 +72,6 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@main
         with:
-          name: ${{env.REPO_NAME}}-${{env.REPO_BRANCH}}-${{env.DATE}}-${GITHUB_RUN_NUMBER}
+          name: ${{env.REPO_NAME}}-${{env.REPO_BRANCH}}-${{env.DATE}}-${{github.run_number}}
           # path: ./code/${{env.REPO_NAME}}/bin
           path: ./scripts
