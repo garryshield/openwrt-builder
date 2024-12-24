@@ -75,3 +75,6 @@ jobs:
           name: ${{env.REPO_NAME}}-${{env.REPO_BRANCH}}-${{env.DATE}}-${{github.run_number}}
           # path: ./code/${{env.REPO_NAME}}/bin
           path: ./scripts
+          overwrite: true
+          include-hidden-files: true
+          compression-level: 0
