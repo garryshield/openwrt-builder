@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    env: 
+    env:
       REPO_NAME: "openwrt"
       REPO_URL: "https://github.com/openwrt/openwrt"
       REPO_BRANCH: "master"
@@ -16,12 +16,23 @@ jobs:
     steps:
       - name: Setup Env
         run: |
-          echo "DATE=$(date +%Y-%m-%d-%H:%M)" >> ${GITHUB_ENV}
+          echo "DATE=$(date +%Y-%m-%d)" >> ${GITHUB_ENV}
 
+      - name: Environment Info
+        run: |
+          env
+          pwd
+          date
+          lscpu
+          free -ht
+          df -hT
+          uname -a
+          cat /etc/os-release
+          
       - name: Checkout
         uses: actions/checkout@main
 
-      # - name: Init environment
+      # - name: Init Environment
       #   run: |
       #     sudo apt update -y
       #     sudo apt full-upgrade -y
@@ -33,30 +44,19 @@ jobs:
       #     python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
       #     uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
-      - name: Environment info
-        run: |
-          env
-          pwd
-          date
-          lscpu
-          free -ht
-          df -hT
-          uname -a
-          cat /etc/os-release
-
-      # - name: Clone code
+      # - name: Clone Code
       #   run: |
       #     pwd
       #     git clone --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} ./code/${REPO_NAME}
-          
-      # - name: Update feeds
+
+      # - name: Update Feeds
       #   run: |
       #     pwd
       #     ls -la
       #     cd ./code/${REPO_NAME}
       #     ./scripts/feeds update -a
 
-      # - name: Install feeds
+      # - name: Install Feeds
       #   run: |
       #     cd ./code/${REPO_NAME}
       #     ./scripts/feeds install -a
@@ -66,13 +66,13 @@ jobs:
       #     cd ./code/${REPO_NAME}
       #     make defconfig
       #     make download -j$(nproc)
-          
+
       # - name: Compile
       #   run: |
       #     cd ./code/${REPO_NAME}
       #     make -j$(nproc) V=s || make -j1 V=s
 
-      - name: Upload
+      - name: Upload Artifact
         uses: actions/upload-artifact@main
         with:
           name: ${{env.REPO_NAME}}-${{env.REPO_BRANCH}}-${{env.DATE}}
