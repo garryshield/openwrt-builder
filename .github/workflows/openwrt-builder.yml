@@ -36,7 +36,7 @@ jobs:
           date
           df -hT
 
-      - name: Clone source code
+      - name: Clone code
         run: |
           pwd
           git clone --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} ./code/${REPO_NAME}
@@ -53,7 +53,7 @@ jobs:
           cd ./code/${REPO_NAME}
           ./scripts/feeds install -a
 
-      - name: Download package
+      - name: Config && Download
         run: |
           cd ./code/${REPO_NAME}
           make defconfig
