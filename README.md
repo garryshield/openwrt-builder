@@ -1,7 +1,7 @@
 ```
 TAGS_NAME="openwrt"
 REPO_URL="https://github.com/openwrt/openwrt"
-REPO_BRANCH="master"
+REPO_BRANCH="main"
 git clone --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} ./code/${TAGS_NAME}
 
 
