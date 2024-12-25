@@ -6,6 +6,8 @@ on:
 
 jobs:
   build:
+    permissions: write-all
+
     env:
       REPO_NAME: "openwrt"
       REPO_URL: "https://github.com/openwrt/openwrt"
