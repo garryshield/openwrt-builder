@@ -9,7 +9,7 @@ jobs:
     env:
       REPO_NAME: "openwrt"
       REPO_URL: "https://github.com/openwrt/openwrt"
-      REPO_BRANCH: "master"
+      REPO_BRANCH: "main"
       DATE: ""
 
     runs-on: ubuntu-24.04
