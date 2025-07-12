@@ -49,10 +49,11 @@ jobs:
       #   with:
       #     name: openwrt-output
       #     path: bin/
-      #      compression-level: 0
+      #     compression-level: 0
 
   DELRUNS:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2
