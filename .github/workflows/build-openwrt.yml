@@ -24,7 +24,6 @@ jobs:
 
     steps:
       - name: Generate Variables
-        id: env
         run: |
           export DEVICE_TARGET=$(echo ${{ matrix.target }} | awk -F '/' '{print $1}')
           echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
@@ -36,24 +35,25 @@ jobs:
       - name: test
         run: |
           echo $GITHUB_ENV
-          
-      # - name: Checkout source
-      #   uses: actions/checkout@v4
 
-      # - name: Prepare folders
-      #   run: |
-      #     mkdir -p ${{ github.workspace }}/bin
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-      # - name: Make Image
-      #   run: |
-      #     docker run --rm \
-      #       --user root \
-      #       -v ${{ github.workspace }}/files:/immortalwrt/files \
-      #       -v ${{ github.workspace }}/bin:/immortalwrt/bin \
-      #       immortalwrt/imagebuilder:x86-64-openwrt-24.10.2 \
-      #       make image \
-      #       BIN_DIR="/immortalwrt/bin" \
-      #       FILES="/immortalwrt/files"
+      - name: Prepare folders
+        run: |
+          mkdir -p ${{ github.workspace }}/bin
+
+      - name: Make Image
+        run: |
+          docker run --rm \
+            --user root \
+            -v ${{ github.workspace }}/files:/openwrt/files \
+            -v ${{ github.workspace }}/bin:/openwrt/bin \
+            ${matrix.platform}/imagebuilder:${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2 \
+            make image \
+            PROFILE="${DEVICE_PROFILE}"
+            BIN_DIR="/openwrt/bin" \
+            FILES="/openwrt/files"
 
       # - name: List output
       #   run: |
