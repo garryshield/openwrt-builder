@@ -40,6 +40,9 @@ jobs:
           echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
           echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
 
+      - name: Prepare Output Directory
+        run: mkdir -p bin
+        
       # - name: Build OpenWrt Firmware via Docker
       #   env:
       #     PLATFORM: ${{ matrix.platform }}
