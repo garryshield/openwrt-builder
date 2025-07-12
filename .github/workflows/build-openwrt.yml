@@ -38,4 +38,4 @@ jobs:
 
       - name: List output
         run: |
-          ls -l bin
+          ls -la ${{ github.workspace }}/bin
