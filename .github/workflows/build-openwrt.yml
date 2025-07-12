@@ -18,15 +18,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: [Config]
     steps:
-      - name: Checkout
-        uses: actions/checkout@main
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-      - name: Pull ImageBuilder Docker Image
+      - name: Prepare folders
+        run: mkdir -p bin files
+        
+      - name: Pull Image
         run: |
           docker pull immortalwrt/imagebuilder:x86-64-openwrt-24.10.2
           docker image ls
 
-      - name: Build
+      - name: Make Image
         run: |
           docker run --rm \
             --user root \
@@ -40,3 +43,9 @@ jobs:
       - name: List output
         run: |
           ls -la ${{ github.workspace }}/bin
+
+      - name: Upload firmware as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt-output
+          path: bin/
