@@ -49,7 +49,7 @@ jobs:
       #   with:
       #     name: openwrt-output
       #     path: bin/
-      #     compression-level: 0
+      #      compression-level: 0
 
   DELRUNS:
     runs-on: ubuntu-latest
