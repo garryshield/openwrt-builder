@@ -22,7 +22,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Prepare folders
-        run: mkdir -p bin files
+        run: |
+          mkdir -p bin files
+          echo '1' >> bin/1.txt
+          echo '2' >> bin/2.txt
 
       # - name: Pull Image
       #   run: |
@@ -40,16 +43,16 @@ jobs:
       #       BIN_DIR="/immortalwrt/bin" \
       #       FILES="/immortalwrt/files"
 
-      # - name: List output
-      #   run: |
-      #     ls -la ${{ github.workspace }}/bin
+      - name: List output
+        run: |
+          ls -la ${{ github.workspace }}/bin
 
-      # - name: Upload firmware as artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: openwrt-output
-      #     path: bin/
-      #     compression-level: 0
+      - name: Upload firmware as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt-output
+          path: bin/
+          compression-level: 0
 
   DELRUNS:
     runs-on: ubuntu-latest
