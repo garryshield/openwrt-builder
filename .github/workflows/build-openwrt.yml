@@ -27,11 +27,14 @@ jobs:
 
       - name: Build
         run: |
-          docker run --rm -it \
-            -v ./files:/immortalwrt/files \
-            -v ./bin:/immortalwrt/bin \
+          docker run --rm \
+            -v ${{ github.workspace }}/files:/immortalwrt/files \
+            -v ${{ github.workspace }}/bin:/immortalwrt/bin \
             immortalwrt/imagebuilder:x86-64-openwrt-24.10.2 \
             make image \
             BIN_DIR="/immortalwrt/bin" \
             FILES="/immortalwrt/files"
 
+      - name: List output
+        run: |
+          ls -l bin
