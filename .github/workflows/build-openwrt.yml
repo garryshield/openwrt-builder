@@ -10,7 +10,7 @@ jobs:
   Config:
     runs-on: ubuntu-latest
     steps:
-      - name: Placeholder Step
+      - name: sPlaceholder Step
         run: echo "Start configuration phase"
 
   Docker-Build:
