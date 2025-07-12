@@ -15,22 +15,34 @@ jobs:
           echo "step1"
 
   Docker:
-    runs-on: ubuntu-latest
     needs: [Config]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [immortalwrt, openwrt]
+        target: [x86/64/generic]
+
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Prepare folders
+      - name: Generate Variables
+        id: env
         run: |
-          mkdir -p bin files
-          echo '1' >> bin/1.txt
-          echo '2' >> bin/2.txt
+          export DEVICE_TARGET=$(echo ${{ matrix.target }} | awk -F '/' '{print $1}')
+          echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
+          export DEVICE_SUBTARGET=$(echo ${{ matrix.target }} | awk -F '/' '{print $2}')
+          echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
+          export DEVICE_PROFILE=$(echo ${{ matrix.target }} | awk -F '/' '{print $3}')
+          echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
 
-      # - name: Pull Image
+      - name: test
+        run: |
+          echo $GITHUB_ENV
+          
+      # - name: Checkout source
+      #   uses: actions/checkout@v4
+
+      # - name: Prepare folders
       #   run: |
-      #     docker pull immortalwrt/imagebuilder:x86-64-openwrt-24.10.2
-      #     docker image ls
+      #     mkdir -p ${{ github.workspace }}/bin
 
       # - name: Make Image
       #   run: |
@@ -43,16 +55,16 @@ jobs:
       #       BIN_DIR="/immortalwrt/bin" \
       #       FILES="/immortalwrt/files"
 
-      - name: List output
-        run: |
-          ls -la ${{ github.workspace }}/bin
+      # - name: List output
+      #   run: |
+      #     ls -la ${{ github.workspace }}/bin
 
-      - name: Upload firmware as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: openwrt-output
-          path: bin/**/*
-          compression-level: 0
+      # - name: Upload firmware as artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: openwrt-output
+      #     path: bin/**/*
+      #     compression-level: 0
 
   DELRUNS:
     runs-on: ubuntu-latest
