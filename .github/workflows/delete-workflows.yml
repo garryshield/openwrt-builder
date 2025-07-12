@@ -1,12 +1,15 @@
-name: Delete Workflows
+name: Delete Old Runs
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
   schedule:
     - cron: 0 0 * * *
 
 jobs:
-  del_runs:
+  del_old_runs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
