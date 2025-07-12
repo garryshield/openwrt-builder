@@ -20,11 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker Build Environment
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
-
       - name: Pull ImageBuilder Docker Image
         run: |
           docker pull immortalwrt/imagebuilder:x86-64-openwrt-24.10.2
+          docker images ls
