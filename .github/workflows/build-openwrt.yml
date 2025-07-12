@@ -23,7 +23,7 @@ jobs:
 
       - name: Prepare folders
         run: mkdir -p bin files
-        
+
       - name: Pull Image
         run: |
           docker pull immortalwrt/imagebuilder:x86-64-openwrt-24.10.2
@@ -49,3 +49,14 @@ jobs:
         with:
           name: openwrt-output
           path: bin/
+          compression-level: 0
+
+  DELRUNS:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          keep_minimum_runs: 2
