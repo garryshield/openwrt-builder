@@ -18,9 +18,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
 
       - name: Pull ImageBuilder Docker Image
         run: |
           docker pull immortalwrt/imagebuilder:x86-64-openwrt-24.10.2
           docker image ls
+
+      - name: Build
+        run: |
+          docker run --rm -it \
+            -v ./files:/immortalwrt/files \
+            -v ./bin:/immortalwrt/bin \
+            immortalwrt/imagebuilder:x86-64-openwrt-24.10.2 \
+            make image \
+            BIN_DIR="/immortalwrt/bin" \
+            FILES="/immortalwrt/files"
+
