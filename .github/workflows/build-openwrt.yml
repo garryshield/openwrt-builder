@@ -45,31 +45,31 @@ jobs:
       - name: Prepare Output Directory
         run: mkdir -p bin
 
-      - name: Build OpenWrt Firmware via Docker
-        env:
-          PLATFORM: ${{ matrix.platform }}
-          VERSION: ${{ matrix.version }}
-          DEVICE_TARGET: ${{ env.DEVICE_TARGET }}
-          DEVICE_SUBTARGET: ${{ env.DEVICE_SUBTARGET }}
-          DEVICE_PROFILE: ${{ env.DEVICE_PROFILE }}
-        run: |
-          if [ "$PLATFORM" = "openwrt" ]; then
-            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${VERSION}"
-          else
-            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-${VERSION}"
-          fi
+      # - name: Build OpenWrt Firmware via Docker
+      #   env:
+      #     PLATFORM: ${{ matrix.platform }}
+      #     VERSION: ${{ matrix.version }}
+      #     DEVICE_TARGET: ${{ env.DEVICE_TARGET }}
+      #     DEVICE_SUBTARGET: ${{ env.DEVICE_SUBTARGET }}
+      #     DEVICE_PROFILE: ${{ env.DEVICE_PROFILE }}
+      #   run: |
+      #     if [ "$PLATFORM" = "openwrt" ]; then
+      #       IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${VERSION}"
+      #     else
+      #       IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-${VERSION}"
+      #     fi
 
-          echo "Using Docker image: ${PLATFORM}/imagebuilder:${IMAGE_TAG}"
+      #     echo "Using Docker image: ${PLATFORM}/imagebuilder:${IMAGE_TAG}"
 
-          docker run --rm \
-            --user root \
-            -v ${{ github.workspace }}/files:/openwrt/files \
-            -v ${{ github.workspace }}/bin:/openwrt/bin \
-            ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
-            make image \
-              PROFILE="${DEVICE_PROFILE}" \
-              BIN_DIR="/openwrt/bin" \
-              FILES="/openwrt/files"
+      #     docker run --rm \
+      #       --user root \
+      #       -v ${{ github.workspace }}/files:/openwrt/files \
+      #       -v ${{ github.workspace }}/bin:/openwrt/bin \
+      #       ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
+      #       make image \
+      #         PROFILE="${DEVICE_PROFILE}" \
+      #         BIN_DIR="/openwrt/bin" \
+      #         FILES="/openwrt/files"
 
       - name: List Build Artifacts
         run: ls -lh bin
