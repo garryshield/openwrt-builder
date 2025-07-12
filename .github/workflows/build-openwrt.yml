@@ -28,6 +28,7 @@ jobs:
       - name: Build
         run: |
           docker run --rm \
+            --user root
             -v ${{ github.workspace }}/files:/immortalwrt/files \
             -v ${{ github.workspace }}/bin:/immortalwrt/bin \
             immortalwrt/imagebuilder:x86-64-openwrt-24.10.2 \
