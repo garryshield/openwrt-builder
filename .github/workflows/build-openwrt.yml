@@ -10,7 +10,7 @@ jobs:
   Config:
     runs-on: ubuntu-latest
     steps:
-      - name: sPlaceholder Step
+      - name: Placeholder Step
         run: echo "Start configuration phase"
 
   Docker-Build:
@@ -25,38 +25,49 @@ jobs:
           - platform: openwrt
             target: x86/64/generic
 
-    env:
-      DEVICE_TARGET: ${{ matrix.target && fromJson('["' + matrix.target + '"]')[0].split('/')[0] }}
-      DEVICE_SUBTARGET: ${{ matrix.target && fromJson('["' + matrix.target + '"]')[0].split('/')[1] }}
-      DEVICE_PROFILE: ${{ matrix.target && fromJson('["' + matrix.target + '"]')[0].split('/')[2] }}
-
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # - name: Build OpenWrt Firmware via Docker
-      #   run: |
-      #     if [ "${{ matrix.platform }}" = "openwrt" ]; then
-      #       IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-24.10.2"
-      #     else
-      #       IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2"
-      #     fi
+      - name: Generate Build Variables
+        shell: bash
+        run: |
+          DEVICE_TARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f1)
+          DEVICE_SUBTARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f2)
+          DEVICE_PROFILE=$(echo "${{ matrix.target }}" | cut -d'/' -f3)
 
-      #     echo "Using Docker image: ${{ matrix.platform }}/imagebuilder:$IMAGE_TAG"
+          echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
+          echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
+          echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
 
-      #     docker run --rm \
-      #       --user root \
-      #       -v ${{ github.workspace }}/files:/openwrt/files \
-      #       -v ${{ github.workspace }}/bin:/openwrt/bin \
-      #       ${{ matrix.platform }}/imagebuilder:$IMAGE_TAG \
-      #       make image \
-      #         PROFILE="${DEVICE_PROFILE}" \
-      #         BIN_DIR="/openwrt/bin" \
-      #         FILES="/openwrt/files"
+      - name: Build OpenWrt Firmware via Docker
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          DEVICE_TARGET: ${{ env.DEVICE_TARGET }}
+          DEVICE_SUBTARGET: ${{ env.DEVICE_SUBTARGET }}
+          DEVICE_PROFILE: ${{ env.DEVICE_PROFILE }}
+        run: |
+          if [ "$PLATFORM" = "openwrt" ]; then
+            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-24.10.2"
+          else
+            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2"
+          fi
+
+          echo "Using Docker image: $PLATFORM/imagebuilder:$IMAGE_TAG"
+
+          docker run --rm \
+            --user root \
+            -v ${{ github.workspace }}/files:/openwrt/files \
+            -v ${{ github.workspace }}/bin:/openwrt/bin \
+            $PLATFORM/imagebuilder:$IMAGE_TAG \
+            make image \
+              PROFILE="$DEVICE_PROFILE" \
+              BIN_DIR="/openwrt/bin" \
+              FILES="/openwrt/files"
 
       - name: Test
         run: |
-          echo ${IMAGE_TAG} > bin/info.txt
+          echo "${{ matrix.platform }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}" > bin/info.txt
 
       - name: List Build Artifacts
         run: ls -lh bin
