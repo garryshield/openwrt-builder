@@ -21,8 +21,10 @@ jobs:
       matrix:
         include:
           - platform: immortalwrt
+            version: 24.10.2
             target: x86/64/generic
           - platform: openwrt
+            version: 24.10.2
             target: x86/64/generic
 
     steps:
@@ -42,35 +44,32 @@ jobs:
 
       - name: Prepare Output Directory
         run: mkdir -p bin
-        
-      # - name: Build OpenWrt Firmware via Docker
-      #   env:
-      #     PLATFORM: ${{ matrix.platform }}
-      #     DEVICE_TARGET: ${{ env.DEVICE_TARGET }}
-      #     DEVICE_SUBTARGET: ${{ env.DEVICE_SUBTARGET }}
-      #     DEVICE_PROFILE: ${{ env.DEVICE_PROFILE }}
-      #   run: |
-      #     if [ "$PLATFORM" = "openwrt" ]; then
-      #       IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-24.10.2"
-      #     else
-      #       IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2"
-      #     fi
 
-      #     echo "Using Docker image: $PLATFORM/imagebuilder:$IMAGE_TAG"
-
-      #     docker run --rm \
-      #       --user root \
-      #       -v ${{ github.workspace }}/files:/openwrt/files \
-      #       -v ${{ github.workspace }}/bin:/openwrt/bin \
-      #       $PLATFORM/imagebuilder:$IMAGE_TAG \
-      #       make image \
-      #         PROFILE="$DEVICE_PROFILE" \
-      #         BIN_DIR="/openwrt/bin" \
-      #         FILES="/openwrt/files"
-
-      - name: Test
+      - name: Build OpenWrt Firmware via Docker
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          VERSION: ${{ matrix.version }}
+          DEVICE_TARGET: ${{ env.DEVICE_TARGET }}
+          DEVICE_SUBTARGET: ${{ env.DEVICE_SUBTARGET }}
+          DEVICE_PROFILE: ${{ env.DEVICE_PROFILE }}
         run: |
-          echo "${{ matrix.platform }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}" > bin/info.txt
+          if [ "$PLATFORM" = "openwrt" ]; then
+            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${VERSION}"
+          else
+            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-${VERSION}"
+          fi
+
+          echo "Using Docker image: ${PLATFORM}/imagebuilder:${IMAGE_TAG}"
+
+          docker run --rm \
+            --user root \
+            -v ${{ github.workspace }}/files:/openwrt/files \
+            -v ${{ github.workspace }}/bin:/openwrt/bin \
+            ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
+            make image \
+              PROFILE="${DEVICE_PROFILE}" \
+              BIN_DIR="/openwrt/bin" \
+              FILES="/openwrt/files"
 
       - name: List Build Artifacts
         run: ls -lh bin
@@ -78,5 +77,5 @@ jobs:
       - name: Upload Firmware Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-${{ matrix.platform }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}
-          path: bin/**/*
+          name: ${{ matrix.platform }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ matrix.version }}
+          path: bin/
