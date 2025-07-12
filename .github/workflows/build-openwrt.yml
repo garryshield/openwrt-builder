@@ -10,78 +10,59 @@ jobs:
   Config:
     runs-on: ubuntu-latest
     steps:
-      - name: step1
-        run: |
-          echo "step1"
+      - name: Placeholder Step
+        run: echo "Start configuration phase"
 
-  Docker:
+  Docker-Build:
     needs: [Config]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        platform: [immortalwrt, openwrt]
-        target: [x86/64/generic]
+        include:
+          - platform: immortalwrt
+            target: x86/64/generic
+          - platform: openwrt
+            target: x86/64/generic
+
+    env:
+      DEVICE_TARGET: ${{ matrix.target && fromJson('["' + matrix.target + '"]')[0].split('/')[0] }}
+      DEVICE_SUBTARGET: ${{ matrix.target && fromJson('["' + matrix.target + '"]')[0].split('/')[1] }}
+      DEVICE_PROFILE: ${{ matrix.target && fromJson('["' + matrix.target + '"]')[0].split('/')[2] }}
 
     steps:
-      - name: Generate Variables
-        run: |
-          export DEVICE_TARGET=$(echo ${{ matrix.target }} | awk -F '/' '{print $1}')
-          echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
-          export DEVICE_SUBTARGET=$(echo ${{ matrix.target }} | awk -F '/' '{print $2}')
-          echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
-          export DEVICE_PROFILE=$(echo ${{ matrix.target }} | awk -F '/' '{print $3}')
-          echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
-
-      - name: test
-        run: |
-          echo $GITHUB_ENV
-
-      - name: Checkout source
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Make Image
-        env:
-          PLATFORM: ${{ matrix.platform }}
-          DEVICE_TARGET: ${{ env.DEVICE_TARGET }}
-          DEVICE_SUBTARGET: ${{ env.DEVICE_SUBTARGET }}
-          DEVICE_PROFILE: ${{ env.DEVICE_PROFILE }}
+      # - name: Build OpenWrt Firmware via Docker
+      #   run: |
+      #     if [ "${{ matrix.platform }}" = "openwrt" ]; then
+      #       IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-24.10.2"
+      #     else
+      #       IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2"
+      #     fi
+
+      #     echo "Using Docker image: ${{ matrix.platform }}/imagebuilder:$IMAGE_TAG"
+
+      #     docker run --rm \
+      #       --user root \
+      #       -v ${{ github.workspace }}/files:/openwrt/files \
+      #       -v ${{ github.workspace }}/bin:/openwrt/bin \
+      #       ${{ matrix.platform }}/imagebuilder:$IMAGE_TAG \
+      #       make image \
+      #         PROFILE="${DEVICE_PROFILE}" \
+      #         BIN_DIR="/openwrt/bin" \
+      #         FILES="/openwrt/files"
+
+      - name: Test
         run: |
-          if [ "${PLATFORM}" = "openwrt" ]; then
-            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-24.10.2"
-          else
-            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2"
-          fi
+          echo ${IMAGE_TAG} > bin/info.txt
 
-          echo "Using image tag: ${PLATFORM}/imagebuilder:${IMAGE_TAG}"
+      - name: List Build Artifacts
+        run: ls -lh bin
 
-          docker run --rm \
-            --user root \
-            -v ${{ github.workspace }}/files:/openwrt/files \
-            -v ${{ github.workspace }}/bin:/openwrt/bin \
-            ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
-            make image \
-            PROFILE="${DEVICE_PROFILE}" \
-            BIN_DIR="/openwrt/bin" \
-            FILES="/openwrt/files"
-
-      - name: List output
-        run: |
-          ls -la ${{ github.workspace }}/bin
-
-      - name: Upload firmware as artifact
+      - name: Upload Firmware Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.platform }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-24.10.2
+          name: firmware-${{ matrix.platform }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}
           path: bin/**/*
-
-  DELRUNS:
-    runs-on: ubuntu-latest
-    permissions: write-all
-    steps:
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
-        with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 0
-          keep_minimum_runs: 2
