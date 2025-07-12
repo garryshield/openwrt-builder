@@ -39,10 +39,6 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Prepare folders
-        run: |
-          mkdir -p ${{ github.workspace }}/bin
-
       - name: Make Image
         env:
           PLATFORM: ${{ matrix.platform }}
@@ -68,16 +64,15 @@ jobs:
             BIN_DIR="/openwrt/bin" \
             FILES="/openwrt/files"
 
-      # - name: List output
-      #   run: |
-      #     ls -la ${{ github.workspace }}/bin
+      - name: List output
+        run: |
+          ls -la ${{ github.workspace }}/bin
 
-      # - name: Upload firmware as artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: openwrt-output
-      #     path: bin/**/*
-      #     compression-level: 0
+      - name: Upload firmware as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-24.10.2
+          path: bin/**/*
 
   DELRUNS:
     runs-on: ubuntu-latest
