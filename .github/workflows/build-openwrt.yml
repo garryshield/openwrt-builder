@@ -44,20 +44,29 @@ jobs:
           mkdir -p ${{ github.workspace }}/bin
 
       - name: Make Image
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          DEVICE_TARGET: ${{ env.DEVICE_TARGET }}
+          DEVICE_SUBTARGET: ${{ env.DEVICE_SUBTARGET }}
+          DEVICE_PROFILE: ${{ env.DEVICE_PROFILE }}
         run: |
+          if [ "${PLATFORM}" = "openwrt" ]; then
+            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-24.10.2"
+          else
+            IMAGE_TAG="${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2"
+          fi
+
+          echo "Using image tag: ${PLATFORM}/imagebuilder:${IMAGE_TAG}"
+
           docker run --rm \
             --user root \
             -v ${{ github.workspace }}/files:/openwrt/files \
             -v ${{ github.workspace }}/bin:/openwrt/bin \
-            ${{ matrix.platform }}/imagebuilder:${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2 \
+            ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
             make image \
             PROFILE="${DEVICE_PROFILE}" \
             BIN_DIR="/openwrt/bin" \
             FILES="/openwrt/files"
-        env:
-          DEVICE_TARGET: ${{ env.DEVICE_TARGET }}
-          DEVICE_SUBTARGET: ${{ env.DEVICE_SUBTARGET }}
-          DEVICE_PROFILE: ${{ env.DEVICE_PROFILE }}
 
       # - name: List output
       #   run: |
