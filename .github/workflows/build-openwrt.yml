@@ -49,9 +49,9 @@ jobs:
             --user root \
             -v ${{ github.workspace }}/files:/openwrt/files \
             -v ${{ github.workspace }}/bin:/openwrt/bin \
-            ${matrix.platform}/imagebuilder:${DEVICE_TARGET}-${DEVICE_SUBTARGET}-openwrt-24.10.2 \
+            ${{ matrix.platform }}/imagebuilder:${{ DEVICE_TARGET }}-${{ DEVICE_SUBTARGET }}-openwrt-24.10.2 \
             make image \
-            PROFILE="${DEVICE_PROFILE}"
+            PROFILE="${{ DEVICE_PROFILE }}"
             BIN_DIR="/openwrt/bin" \
             FILES="/openwrt/files"
 
