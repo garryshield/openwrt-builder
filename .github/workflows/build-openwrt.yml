@@ -6,15 +6,11 @@ on:
     branches:
       - main
 
-jobs:
-  Config:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Placeholder Step
-        run: echo "Start configuration phase"
+permissions:
+  contents: write
 
+jobs:
   Build:
-    needs: [Config]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
