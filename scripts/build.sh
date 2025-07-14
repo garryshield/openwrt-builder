@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # =============  ==============
 echo '========'
 pwd
@@ -10,24 +11,26 @@ env
 # =============  ==============
 echo '========'
 
+if [ "$PLATFORM" = "openwrt" ]; then
+  IMAGE_TAG="${TARGET}-${SUBTARGET}-${VERSION}"
+else
+  IMAGE_TAG="${TARGET}-${SUBTARGET}-openwrt-${VERSION}"
+fi
 
-
-# =============  ==============
-echo '========'
-
-curl -sSL -o ./packages/luci-app-openclash_0.46.120_all.ipk https://github.com/vernesong/OpenClash/releases/download/v0.46.120/luci-app-openclash_0.46.120_all.ipk
-
-ls -la ./packages
-
-PACKAGES="$PACKAGES curl"
-PACKAGES="$PACKAGES dnsmasq-full -dnsmasq"
-
-# make image \
-#   PROFILE="${PROFILE}" \
-#   BIN_DIR="/openwrt/bin" \
-#   FILES="/openwrt/files" \
-#   PACKAGES="${PACKAGES}"
-
-cat << EOF > /openwrt/bin/info.md
-${PACKAGES}
+cat <<EOF > .env
+  PLATFORM=${PLATFORM}
+  VERSION=${VERSION}
+  TARGET=${TARGET}
+  SUBTARGET=${SUBTARGET}
+  PROFILE=${PROFILE}
+  IMAGE_TAG=${IMAGE_TAG}
 EOF
+
+docker run --rm \
+  --user root \
+  --env-file .env \
+  -v ./files:/openwrt/files \
+  -v ./bin:/openwrt/bin \
+  -v ./scripts:/openwrt/scripts \
+  ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
+  /bin/bash /openwrt/scripts/docker.sh
