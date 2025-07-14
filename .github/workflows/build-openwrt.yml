@@ -84,9 +84,6 @@ jobs:
             ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
             /bin/bash /openwrt/scripts/build.sh
 
-      - name: List Build Artifacts
-        run: ls -lh bin
-
       - name: Upload Firmware Artifact
         uses: actions/upload-artifact@v4
         env:
@@ -98,5 +95,9 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
+        env:
+          TARGET: ${{ env.TARGET }}
+          SUBTARGET: ${{ env.SUBTARGET }}
         with:
+          tag_name: ${{ matrix.platform }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ matrix.version }}
           files: README.md
