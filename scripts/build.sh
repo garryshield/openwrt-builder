@@ -17,8 +17,8 @@ ls -la ./packages
 PACKAGES="$PACKAGES curl"
 PACKAGES="$PACKAGES dnsmasq-full -dnsmasq"
 
-make image \
-  PROFILE="${PROFILE}" \
-  BIN_DIR="/openwrt/bin" \
-  FILES="/openwrt/files" \
-  PACKAGES="${PACKAGES}"
+# make image \
+#   PROFILE="${PROFILE}" \
+#   BIN_DIR="/openwrt/bin" \
+#   FILES="/openwrt/files" \
+#   PACKAGES="${PACKAGES}"

@@ -95,3 +95,8 @@ jobs:
         with:
           name: ${{ matrix.platform }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ matrix.version }}
           path: bin/
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: README.md
