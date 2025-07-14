@@ -96,5 +96,5 @@ jobs:
           SUBTARGET: ${{ env.SUBTARGET }}
         with:
           tag_name: ${{ matrix.platform }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ matrix.version }}
-          body_path: info.md
+          body_path: bin/info.md
           files: bin/*
