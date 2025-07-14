@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# =============  ==============
-echo '========'
+echo '=============  =============='
 PLATFORM=openwrt
 _TARGET=x86/64/generic
 TARGET=$(echo "$_TARGET" | cut -d'/' -f1)
