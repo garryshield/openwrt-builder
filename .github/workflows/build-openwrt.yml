@@ -71,7 +71,7 @@ jobs:
             -v ${{ github.workspace }}/bin:/openwrt/bin \
             -v ${{ github.workspace }}/scripts:/openwrt/scripts \
             ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
-            /openwrt/scripts/build.sh
+            /bin/bash /openwrt/scripts/build.sh
             # make image \
             #   PROFILE="${PROFILE}" \
             #   BIN_DIR="/openwrt/bin" \
