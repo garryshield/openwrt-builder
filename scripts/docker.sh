@@ -7,7 +7,7 @@ PACKAGES="${PACKAGES:+$PACKAGES }luci-app-openclash"
 
 if [ "$PLATFORM" = "openwrt" ]; then
   curl -sSL -o ./packages/luci-app-openclash_0.46.133_all.ipk https://raw.githubusercontent.com/vernesong/OpenClash/package/master/luci-app-openclash_0.46.133_all.ipk
-  PACKAGES="${PACKAGES:+$PACKAGES }luci luci-compat luci-i18n-base-zh"
+  PACKAGES="${PACKAGES:+$PACKAGES }luci luci-compat luci-i18n-base-zh-cn"
   PACKAGES="${PACKAGES:+$PACKAGES }dnsmasq-full -dnsmasq"
 fi
 
