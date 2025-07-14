@@ -17,6 +17,7 @@ else
   IMAGE_TAG="${TARGET}-${SUBTARGET}-openwrt-${VERSION}"
 fi
 
+
 cat <<EOF > .env
   PLATFORM=${PLATFORM}
   VERSION=${VERSION}
