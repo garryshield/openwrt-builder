@@ -1,0 +1,11 @@
+#!/bin/sh
+
+(echo "111111"; sleep 1; echo "111111") | passwd > /dev/null
+
+uci set network.lan.ipaddr='10.10.1.180'
+uci set network.lan.gateway='10.10.1.1'
+uci set network.lan.dns='10.10.1.1'
+
+uci set dhcp.lan.ignore='1'
+
+uci commit
