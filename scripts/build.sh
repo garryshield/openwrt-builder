@@ -23,12 +23,6 @@ PACKAGES="$PACKAGES dnsmasq-full -dnsmasq"
 #   FILES="/openwrt/files" \
 #   PACKAGES="${PACKAGES}"
 
-echo '1' > /openwrt/bin/1.txt
-echo '2' > /openwrt/bin/2.txt
-
 cat << EOF > /openwrt/bin/info.md
 ${PACKAGES}
-$(pwd)
 EOF
-
-ls -la

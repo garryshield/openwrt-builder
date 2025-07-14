@@ -27,58 +27,62 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Generate Build Variables
-        shell: bash
+      - name: Build
         run: |
-          TARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f1)
-          SUBTARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f2)
-          PROFILE=$(echo "${{ matrix.target }}" | cut -d'/' -f3)
+            /bin/bash ./scripts/build.sh
 
-          echo "TARGET=$TARGET" >> $GITHUB_ENV
-          echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
-          echo "PROFILE=$PROFILE" >> $GITHUB_ENV
+      # - name: Generate Build Variables
+      #   shell: bash
+      #   run: |
+      #     TARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f1)
+      #     SUBTARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f2)
+      #     PROFILE=$(echo "${{ matrix.target }}" | cut -d'/' -f3)
 
-          PACKAGES=$(cat $GITHUB_WORKSPACE/config/packages.config | tr -s "\n" " ")
-          echo "PACKAGES=$PACKAGES" >> $GITHUB_ENV
+      #     echo "TARGET=$TARGET" >> $GITHUB_ENV
+      #     echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
+      #     echo "PROFILE=$PROFILE" >> $GITHUB_ENV
 
-      - name: Prepare Output Directory
-        run: mkdir -p bin
+      #     PACKAGES=$(cat $GITHUB_WORKSPACE/config/packages.config | tr -s "\n" " ")
+      #     echo "PACKAGES=$PACKAGES" >> $GITHUB_ENV
 
-      - name: Build OpenWrt Firmware via Docker
-        env:
-          PLATFORM: ${{ matrix.platform }}
-          VERSION: ${{ matrix.version }}
-          TARGET: ${{ env.TARGET }}
-          SUBTARGET: ${{ env.SUBTARGET }}
-          PROFILE: ${{ env.PROFILE }}
-          PACKAGES: ${{env.PACKAGES}}
-        run: |
-          if [ "$PLATFORM" = "openwrt" ]; then
-            IMAGE_TAG="${TARGET}-${SUBTARGET}-${VERSION}"
-          else
-            IMAGE_TAG="${TARGET}-${SUBTARGET}-openwrt-${VERSION}"
-          fi
+      # - name: Prepare Output Directory
+      #   run: mkdir -p bin
 
-          echo "Using Docker image: ${PLATFORM}/imagebuilder:${IMAGE_TAG}"
+      # - name: Build OpenWrt Firmware via Docker
+      #   env:
+      #     PLATFORM: ${{ matrix.platform }}
+      #     VERSION: ${{ matrix.version }}
+      #     TARGET: ${{ env.TARGET }}
+      #     SUBTARGET: ${{ env.SUBTARGET }}
+      #     PROFILE: ${{ env.PROFILE }}
+      #     PACKAGES: ${{env.PACKAGES}}
+      #   run: |
+      #     if [ "$PLATFORM" = "openwrt" ]; then
+      #       IMAGE_TAG="${TARGET}-${SUBTARGET}-${VERSION}"
+      #     else
+      #       IMAGE_TAG="${TARGET}-${SUBTARGET}-openwrt-${VERSION}"
+      #     fi
 
-          cat <<EOF > docker.env
-            PLATFORM=${PLATFORM}
-            VERSION=${VERSION}
-            TARGET=${TARGET}
-            SUBTARGET=${SUBTARGET}
-            PROFILE=${PROFILE}
-            PACKAGES=${PACKAGES}
-            IMAGE_TAG=${IMAGE_TAG}
-          EOF
+      #     echo "Using Docker image: ${PLATFORM}/imagebuilder:${IMAGE_TAG}"
 
-          docker run --rm \
-            --user root \
-            --env-file docker.env \
-            -v ${{ github.workspace }}/files:/openwrt/files \
-            -v ${{ github.workspace }}/bin:/openwrt/bin \
-            -v ${{ github.workspace }}/scripts:/openwrt/scripts \
-            ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
-            /bin/bash /openwrt/scripts/build.sh
+      #     cat <<EOF > docker.env
+      #       PLATFORM=${PLATFORM}
+      #       VERSION=${VERSION}
+      #       TARGET=${TARGET}
+      #       SUBTARGET=${SUBTARGET}
+      #       PROFILE=${PROFILE}
+      #       PACKAGES=${PACKAGES}
+      #       IMAGE_TAG=${IMAGE_TAG}
+      #     EOF
+
+      #     docker run --rm \
+      #       --user root \
+      #       --env-file docker.env \
+      #       -v ${{ github.workspace }}/files:/openwrt/files \
+      #       -v ${{ github.workspace }}/bin:/openwrt/bin \
+      #       -v ${{ github.workspace }}/scripts:/openwrt/scripts \
+      #       ${PLATFORM}/imagebuilder:${IMAGE_TAG} \
+      #       /bin/bash /openwrt/scripts/build.sh
 
       - name: Upload Firmware Artifact
         uses: actions/upload-artifact@v4
@@ -95,6 +99,7 @@ jobs:
           TARGET: ${{ env.TARGET }}
           SUBTARGET: ${{ env.SUBTARGET }}
         with:
+          overwrite_files: true
           tag_name: ${{ matrix.platform }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ matrix.version }}
           body_path: bin/info.md
           files: bin/*
