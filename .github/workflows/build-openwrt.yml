@@ -24,12 +24,22 @@ jobs:
             target: x86/64/generic
 
     steps:
+      - name: Generate Build Variables
+        run: |
+          TARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f1)
+          SUBTARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f2)
+          PROFILE=$(echo "${{ matrix.target }}" | cut -d'/' -f3)
+
+          echo "TARGET=$TARGET" >> $GITHUB_ENV
+          echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
+          echo "PROFILE=$PROFILE" >> $GITHUB_ENV
+
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
       - name: Build
         run: |
-            /bin/bash ./scripts/build.sh
+          /bin/bash ./scripts/build.sh
 
       # - name: Generate Build Variables
       #   shell: bash

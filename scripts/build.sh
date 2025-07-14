@@ -10,6 +10,11 @@ env
 # =============  ==============
 echo '========'
 
+
+
+# =============  ==============
+echo '========'
+
 curl -sSL -o ./packages/luci-app-openclash_0.46.120_all.ipk https://github.com/vernesong/OpenClash/releases/download/v0.46.120/luci-app-openclash_0.46.120_all.ipk
 
 ls -la ./packages
