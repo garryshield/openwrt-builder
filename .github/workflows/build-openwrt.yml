@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - platform: immortalwrt
-          #   version: 24.10.2
-          #   target: x86/64/generic
+          - platform: immortalwrt
+            version: 24.10.2
+            target: x86/64/generic
           - platform: openwrt
             version: 24.10.2
             target: x86/64/generic
@@ -47,12 +47,12 @@ jobs:
       - name: Upload Firmware Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PLATFORM }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ env.VERSION }}
+          name: ${{ env.PLATFORM }}-${{ env.VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}
           path: bin/
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.PLATFORM }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ env.VERSION }}
+          tag_name: ${{ env.PLATFORM }}-${{ env.VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}
           body_path: bin/info.md
           files: bin/*
