@@ -62,7 +62,6 @@ ssh pve '
   qm start 101
 '
 
-
 gzip -dkvqf immortalwrt-24.10.2-x86-64-generic-ext4-combined.img.gz
 scp immortalwrt-24.10.2-x86-64-generic-ext4-combined.img pve:/var/lib/vz/template/iso/
 ssh pve '

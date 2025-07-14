@@ -13,16 +13,19 @@ fi
 
 mkdir -p /openwrt/files/etc/openclash/core
 META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-amd64.tar.gz"
-wget -qO- $META_URL | tar xOvz > /openwrt/files/etc/openclash/core/clash_meta
+wget -qO- $META_URL | tar xzO > /openwrt/files/etc/openclash/core/clash_meta
 chmod +x /openwrt/files/etc/openclash/core/clash_meta
 
+# https://mirrors.tuna.tsinghua.edu.cn/help/openwrt/
+sed -i 's_https\?://downloads.openwrt.org_https://mirrors.tuna.tsinghua.edu.cn/openwrt_' repositories.conf
+
 make image \
-  BIN_DIR="/openwrt/bin" \
+  BIN_DIR="/openwrt/bin/${TAG_NAME}" \
   FILES="/openwrt/files" \
   PROFILE="${PROFILE}" \
   PACKAGES="${PACKAGES}"
 
-cat << EOF > /openwrt/bin/info.md
-${PLATFORM}-${VERSION}-${TARGET}-${SUBTARGET}-${PROFILE}
+cat << EOF > /openwrt/bin/${TAG_NAME}/info.md
+${TAG_NAME}
 ${PACKAGES}
 EOF

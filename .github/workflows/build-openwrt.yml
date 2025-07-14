@@ -16,27 +16,31 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - platform: immortalwrt
-          #   version: 24.10.2
-          #   target: x86/64/generic
+          - platform: immortalwrt
+            version: 24.10.2
+            target: x86/64/generic
           - platform: openwrt
             version: 24.10.2
             target: x86/64/generic
 
     steps:
-      - name: Generate Build Variables
+      - name: Generate Variables
         run: |
-          echo "PLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
-          echo "VERSION=${{ matrix.version }}" >> $GITHUB_ENV
-
+          PLATFORM=${{ matrix.platform }}
+          VERSION=${{ matrix.version }}
           TARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f1)
           SUBTARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f2)
           PROFILE=$(echo "${{ matrix.target }}" | cut -d'/' -f3)
+          TAG_NAME="${PLATFORM}-${VERSION}-${TARGET}-${SUBTARGET}"
+
+          echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TARGET=$TARGET" >> $GITHUB_ENV
           echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
           echo "PROFILE=$PROFILE" >> $GITHUB_ENV
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
-      - name: Checkout Source Code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Build
@@ -44,15 +48,15 @@ jobs:
           chmod +x ./scripts/build.sh
           ./scripts/build.sh
 
-      - name: Upload Firmware Artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PLATFORM }}-${{ env.VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}
-          path: bin/
+          name: ${{ env.TAG_NAME }}
+          path: bin/${{ env.TAG_NAME }}
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.PLATFORM }}-${{ env.VERSION }}-${{ env.TARGET }}-${{ env.SUBTARGET }}
-          body_path: bin/info.md
-          files: bin/*
+          tag_name: ${{ env.TAG_NAME }}
+          body_path: bin/${{ env.TAG_NAME }}/info.md
+          files: bin/${{ env.TAG_NAME }}/*

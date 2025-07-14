@@ -6,6 +6,7 @@ echo '=============  =============='
 : "${TARGET:=x86}"
 : "${SUBTARGET:=64}"
 : "${PROFILE:=generic}"
+: "${TAG_NAME:=${PLATFORM}-${VERSION}-${TARGET}-${SUBTARGET}-${PROFILE}}"
 
 if [ "$PLATFORM" = "openwrt" ]; then
   IMAGE_TAG="${TARGET}-${SUBTARGET}-${VERSION}"
@@ -19,6 +20,7 @@ VERSION=${VERSION}
 TARGET=${TARGET}
 SUBTARGET=${SUBTARGET}
 PROFILE=${PROFILE}
+TAG_NAME=${TAG_NAME}
 IMAGE_TAG=${IMAGE_TAG}
 EOF
 
