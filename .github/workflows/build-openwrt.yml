@@ -26,12 +26,12 @@ jobs:
     steps:
       - name: Generate Build Variables
         run: |
+          echo "PLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
+          echo "VERSION=${{ matrix.version }}" >> $GITHUB_ENV
+
           TARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f1)
           SUBTARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f2)
           PROFILE=$(echo "${{ matrix.target }}" | cut -d'/' -f3)
-
-          echo "PLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
-          echo "VERSION=${{ matrix.version }}" >> $GITHUB_ENV
           echo "TARGET=$TARGET" >> $GITHUB_ENV
           echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
           echo "PROFILE=$PROFILE" >> $GITHUB_ENV
@@ -46,19 +46,13 @@ jobs:
 
       - name: Upload Firmware Artifact
         uses: actions/upload-artifact@v4
-        env:
-          TARGET: ${{ env.TARGET }}
-          SUBTARGET: ${{ env.SUBTARGET }}
         with:
-          name: ${{ matrix.platform }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ matrix.version }}
+          name: ${{ env.PLATFORM }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ env.VERSION }}
           path: bin/
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        env:
-          TARGET: ${{ env.TARGET }}
-          SUBTARGET: ${{ env.SUBTARGET }}
         with:
-          tag_name: ${{ matrix.platform }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ matrix.version }}
+          tag_name: ${{ env.PLATFORM }}-${{ env.TARGET }}-${{ env.SUBTARGET }}-${{ env.VERSION }}
           body_path: bin/info.md
           files: bin/*

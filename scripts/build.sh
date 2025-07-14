@@ -2,14 +2,11 @@
 
 # =============  ==============
 echo '========'
-pwd
-
-# =============  ==============
-echo '========'
-env
-
-# =============  ==============
-echo '========'
+PLATFORM=openwrt
+_TARGET=x86/64/generic
+TARGET=$(echo "$_TARGET" | cut -d'/' -f1)
+SUBTARGET=$(echo "$_TARGET" | cut -d'/' -f2)
+PROFILE=$(echo "$_TARGET" | cut -d'/' -f3)
 
 if [ "$PLATFORM" = "openwrt" ]; then
   IMAGE_TAG="${TARGET}-${SUBTARGET}-${VERSION}"
