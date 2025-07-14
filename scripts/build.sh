@@ -15,7 +15,7 @@ curl -sSL -o ./packages/luci-app-openclash_0.46.120_all.ipk https://github.com/v
 ls -la ./packages
 
 PACKAGES="$PACKAGES curl"
-PACKAGES="dnsmasq-full -dnsmasq"
+PACKAGES="$PACKAGES dnsmasq-full -dnsmasq"
 
 make image \
   PROFILE="${PROFILE}" \
