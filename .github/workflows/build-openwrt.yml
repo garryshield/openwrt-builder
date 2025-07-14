@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: immortalwrt
-            version: 24.10.2
-            target: x86/64/generic
+          # - platform: immortalwrt
+          #   version: 24.10.2
+          #   target: x86/64/generic
           - platform: openwrt
             version: 24.10.2
             target: x86/64/generic
