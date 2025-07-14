@@ -30,3 +30,5 @@ cat << EOF > info.md
 ${PACKAGES}
 $(pwd)
 EOF
+
+ls -la
