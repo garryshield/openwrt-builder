@@ -39,6 +39,7 @@ jobs:
 
       - name: Build
         run: |
+          chmow +x ./scripts/build.sh
           ./scripts/build.sh
 
       # - name: Generate Build Variables
