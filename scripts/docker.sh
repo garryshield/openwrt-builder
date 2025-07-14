@@ -18,4 +18,5 @@ PACKAGES="$PACKAGES dnsmasq-full -dnsmasq"
 
 cat << EOF > /openwrt/bin/info.md
 ${PACKAGES}
+$(date)
 EOF
