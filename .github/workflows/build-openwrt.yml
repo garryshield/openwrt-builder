@@ -65,8 +65,19 @@ jobs:
 
           echo "Using Docker image: ${PLATFORM}/imagebuilder:${IMAGE_TAG}"
 
+          # 將所有變數寫入 .env
+          cat <<EOF > docker.env
+          PLATFORM=${PLATFORM}
+          VERSION=${VERSION}
+          TARGET=${TARGET}
+          SUBTARGET=${SUBTARGET}
+          PROFILE=${PROFILE}
+          PACKAGES=${PACKAGES}
+          EOF
+
           docker run --rm \
             --user root \
+            --env-file docker.env \
             -v ${{ github.workspace }}/files:/openwrt/files \
             -v ${{ github.workspace }}/bin:/openwrt/bin \
             -v ${{ github.workspace }}/scripts:/openwrt/scripts \
