@@ -1,0 +1,66 @@
+name: Build OpenWrt
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: immortalwrt
+            version: 24.10.2
+            target: x86/64/generic
+          - platform: openwrt
+            version: 24.10.2
+            target: x86/64/generic
+
+    steps:
+      - name: Variables
+        run: |
+          BUD_PLATFORM=${{ matrix.platform }}
+          BUD_VERSION=${{ matrix.version }}
+          BUD_TARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f1)
+          BUD_SUBTARGET=$(echo "${{ matrix.target }}" | cut -d'/' -f2)
+          BUD_PROFILE=$(echo "${{ matrix.target }}" | cut -d'/' -f3)
+          BUD_TAG_NAME="${BUD_PLATFORM}-${BUD_VERSION}-${BUD_TARGET}-${BUD_SUBTARGET}"
+
+          echo "BUD_PLATFORM=$BUD_PLATFORM" >> $GITHUB_ENV
+          echo "BUD_VERSION=$BUD_VERSION" >> $GITHUB_ENV
+          echo "BUD_TARGET=$BUD_TARGET" >> $GITHUB_ENV
+          echo "BUD_SUBTARGET=$BUD_SUBTARGET" >> $GITHUB_ENV
+          echo "BUD_PROFILE=$BUD_PROFILE" >> $GITHUB_ENV
+          echo "BUD_TAG_NAME=$BUD_TAG_NAME" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          chmod +x ./scripts/build.sh
+          ./scripts/build.sh
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        env:
+          BUD_TAG_NAME: ${{ env.BUD_TAG_NAME }} 
+        with:
+          name: ${{ env.BUD_TAG_NAME }}
+          path: ./bin/${{ env.BUD_TAG_NAME }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          BUD_TAG_NAME: ${{ env.BUD_TAG_NAME }} 
+        with:
+          tag_name: ${{ env.BUD_TAG_NAME }}
+          body_path: ./bin/${{ env.BUD_TAG_NAME }}/info.md
+          files: ./bin/${{ env.BUD_TAG_NAME }}/*

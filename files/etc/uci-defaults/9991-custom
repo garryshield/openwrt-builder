@@ -1,0 +1,123 @@
+#!/bin/sh
+
+. /etc/config/.env
+. /etc/config/.cnf
+
+echo '============= uci-default opkg =============='
+# 备份 
+# /etc/opkg
+# ├── customfeeds.conf
+# ├── distfeeds.conf
+# └── keys
+#     └── d310c6f2833e97f7
+cp -rf /etc/opkg /etc/opkg.bak
+cp -rf /etc/opkg.conf /etc/opkg.conf.bak
+if [ "$BUD_PLATFORM" = "openwrt" ]; then
+  # TODO 添加 immortalwrt 到 key
+  # 禁用签名验证
+  sed -i 's/^option check_signature/# option check_signature/' /etc/opkg.conf
+
+  # 添加 immortalwrt 的 luci 源
+  IMMORTAL_LINE=$(grep '^src/gz openwrt_luci' "/etc/opkg/distfeeds.conf" | \
+    sed 's|^src/gz openwrt_luci|src/gz immortalwrt_luci|' | \
+    sed 's|downloads.openwrt.org|downloads.immortalwrt.org|')
+  awk -v new_line="$IMMORTAL_LINE" '
+    {
+      print $0
+      if ($0 ~ /^src\/gz openwrt_telephony/) {
+        print new_line
+      }
+    }
+  ' "/etc/opkg/distfeeds.conf" > "/etc/opkg/distfeeds.conf.tmp" && mv "/etc/opkg/distfeeds.conf.tmp" "/etc/opkg/distfeeds.conf"
+else
+  :
+fi
+
+# 北大源
+# https://mirrors.pku.edu.cn/Help/Openwrt
+# https://mirrors.pku.edu.cn/Help/immortalwrt
+# 清华源
+# https://mirrors.tuna.tsinghua.edu.cn/help/openwrt/
+# https://downloads.openwrt.org/releases/24.10.2/packages/x86_64/luci
+# https://mirrors.pku.edu.cn/openwrt/releases/24.10.2/packages/x86_64/luci
+# https://downloads.immortalwrt.org/releases/24.10.2/packages/x86_64/luci
+# https://mirrors.pku.edu.cn/immortalwrt/releases/24.10.2/packages/x86_64/luci
+sed -i 's_downloads.openwrt.org_mirrors.pku.edu.cn/openwrt_' /etc/opkg/distfeeds.conf
+sed -i 's_downloads.immortalwrt.org_mirrors.pku.edu.cn/immortalwrt_' /etc/opkg/distfeeds.conf
+
+echo '============= uci-default base =============='
+uci -q batch <<-EOF
+  set system.@system[0].timezone="CST-8"
+  set system.@system[0].zonename="Asia/Shanghai"
+
+  delete system.ntp.server
+  add_list system.ntp.server="ntp.tencent.com"
+  add_list system.ntp.server="ntp1.aliyun.com"
+  add_list system.ntp.server="ntp.ntsc.ac.cn"
+  add_list system.ntp.server="cn.ntp.org.cn"
+
+  commit system
+EOF
+
+echo '============= uci-default root =============='
+if [ -n "$CNF_ROOT_PASSWD" ]; then
+  (echo "$CNF_ROOT_PASSWD"; sleep 1; echo "$CNF_ROOT_PASSWD") | passwd > /dev/null
+fi
+
+echo '============= uci-default network =============='
+# 网卡信息
+ifnames=""
+for iface in /sys/class/net/*; do
+  name=$(basename "$iface")
+  if [ -e "$iface/device" ] && echo "$name" | grep -Eq '^eth|^en'; then
+    count=$((count + 1))
+    ifnames="$ifnames $name"
+  fi
+done
+count=$(echo "$ifnames" | awk '{print NF}')
+echo "count=$count"
+echo "interfaces:$ifnames"
+
+lan_ifname=""
+wan_ifname=""
+if [ "$count" -eq 1 ] || [ "$CNF_NET_MODE" = "test" ]; then
+  lan_ifname=$ifnames
+elif [ "$count" -gt 1 ]; then
+  # 首个网卡作 wan 口
+  wan_ifname=$(echo "$ifnames" | awk '{print $1}')
+  # 其余网卡作 lan 口
+  lan_ifname=$(echo "$ifnames" | awk '{for(i=2;i<=NF;i++) printf $i (i<NF?" ":"\n")}')
+fi
+
+# 创建 br-lan 网桥
+while uci delete network.@device[0] >/dev/null 2>&1; do :; done
+uci add network device
+uci set network.@device[-1].name='br-lan'
+uci set network.@device[-1].type='bridge'
+for ifname in $lan_ifname; do
+    uci add_list network.@device[-1].ports="$ifname"
+done
+
+uci -q delete network.lan
+uci set network.lan="interface"
+uci set network.lan.device="br-lan"
+uci set network.lan.proto="$CNF_LAN_PROTO"
+uci set network.lan.ipaddr="$CNF_LAN_IPADDR"
+uci set network.lan.netmask="$CNF_LAN_NETMASK"
+if [ "$CNF_NET_MODE" = "test" ]; then
+  uci set network.lan.gateway="$CNF_LAN_GATEWAY"
+  uci set network.lan.dns="$CNF_LAN_DNS"
+  uci set dhcp.lan.ignore="1"
+fi
+
+uci -q delete network.wan
+uci -q delete network.wan6
+if [ -n "$wan_ifname" ]; then
+  uci set network.wan="interface"
+  uci set network.wan.device="$wan_ifname"
+  uci set network.wan.proto="pppoe"
+  uci set network.wan.username="$CNF_WAN_PPPOE_USERNAME"
+  uci set network.wan.password="$CNF_WAN_PPPOE_PASSWORD"
+fi
+
+uci commit
