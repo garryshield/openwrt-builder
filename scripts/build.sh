@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo '============= build.sh =============='
-: "${BUD_PLATFORM:=immortalwrt}"
+: "${BUD_PLATFORM:=openwrt}"
 : "${BUD_VERSION:=24.10.2}"
 : "${BUD_TARGET:=x86}"
 : "${BUD_SUBTARGET:=64}"
@@ -41,6 +41,7 @@ echo $WorkingDir
 
 mkdir -p ./bin
 sudo chown -R 1000:1000 ./
+ls -al ./
 
 docker run --rm \
   -u 1000:1000 \
