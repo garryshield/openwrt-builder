@@ -56,6 +56,7 @@ BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-i18n-base-zh-cn luci-i18n-fire
 BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }curl tree"
 BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }pciutils"
 BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }fdisk block-mount"
+BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }resize2fs losetup"
 BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }iperf3"
 BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }socat"
 BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }openssh-sftp-server"
@@ -71,6 +72,8 @@ BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-app-ttyd luci-i18n-ttyd-zh-cn"
 
 # luci-app-ddns
 # /usr/bin/ddns --help
+# https://github.com/openwrt/luci/tree/master/applications/luci-app-ddns
+# https://github.com/openwrt/packages/blob/master/net/ddns-scripts
 BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-app-ddns luci-i18n-ddns-zh-cn"
 
 # luci-app-arpbind
@@ -80,9 +83,9 @@ echo '============= docker.sh openclash =============='
 # https://github.com/vernesong/OpenClash
 # https://wiki.metacubex.one/
 # 下载 ipk
-OPENCLASH_VERSION_URL="https://raw.githubusercontent.com/vernesong/OpenClash/package/master/version"
+OPENCLASH_VERSION_URL="https://gh-proxy.com/https://raw.githubusercontent.com/vernesong/OpenClash/package/master/version"
 OPENCLASH_VERSION=$(curl -s "$OPENCLASH_VERSION_URL" | head -n 1 | tr -d 'v')
-OPENCLASH_IPK_URL="https://raw.githubusercontent.com/vernesong/OpenClash/package/master/luci-app-openclash_${OPENCLASH_VERSION}_all.ipk"
+OPENCLASH_IPK_URL="https://gh-proxy.com/https://raw.githubusercontent.com/vernesong/OpenClash/package/master/luci-app-openclash_${OPENCLASH_VERSION}_all.ipk"
 curl -sSL -o "packages/luci-app-openclash_all.ipk" "$OPENCLASH_IPK_URL"
 BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-app-openclash"
 
@@ -100,7 +103,7 @@ make image \
   FILES="$(pwd)/openwrt/files" \
   PROFILE="${BUD_PROFILE}" \
   PACKAGES="${BUD_PACKAGES}" \
-  ROOTFS_PARTSIZE="300"
+  ROOTFS_PARTSIZE="${BUD_ROOTFS_PARTSIZE}"
 
 ls -la $(pwd)/openwrt/bin/${BUD_TAG_NAME}
 

@@ -19,47 +19,31 @@ docker run --rm -it openwrt_tmp:24.10.2 /bin/sh
 ```
 
 ```bash
-gzip -dkvqf openwrt-24.10.2-x86-64-generic-ext4-combined.img.gz
-scp openwrt-24.10.2-x86-64-generic-ext4-combined.img pve:/var/lib/vz/template/iso/
-ssh pve '
-  qm unlock 101
-  qm stop 101
-  qm destroy 101 --purge --destroy-unreferenced-disks
+IMG_FIL="immortalwrt-24.10.2-x86-64-generic-ext4-combined.img.gz"
+VM_NAME="Immortalwrt"
+IMG_FIL="openwrt-24.10.2-x86-64-generic-ext4-combined.img.gz"
+VM_NAME="Openwrt"
+VM_ID=100
+IMG="${IMG_FIL%.gz}"
+gzip -dkvqf ${IMG_FIL}
+scp ${IMG} pve:/var/lib/vz/template/iso/
+ssh pve bash -s <<EOF
+  # qm unlock ${VM_ID}
+  # qm stop ${VM_ID}
+  # qm destroy ${VM_ID} --purge --destroy-unreferenced-disks
 
-  qm create 101 --name Openwrt
-  qm set 101 --core 2 --memory 2048 
-  qm set 101 --net0 virtio,bridge=vmbr0,firewall=1 
-  qm set 101 --scsihw virtio-scsi-pci 
-  qm set 101 --scsi0 local:0,import-from=/var/lib/vz/template/iso/openwrt-24.10.2-x86-64-generic-ext4-combined.img
-  qm disk resize 101 scsi0 +256M
-  qm set 101 --boot order=scsi0
-  qm set 101 --hostpci0 0000:05:00
-  qm set 101 --hostpci1 0000:06:00
-  qm config 101
-  qm start 101
-'
-```
-
-```bash
-gzip -dkvqf immortalwrt-24.10.2-x86-64-generic-ext4-combined.img.gz
-scp immortalwrt-24.10.2-x86-64-generic-ext4-combined.img pve:/var/lib/vz/template/iso/
-ssh pve '
-  qm unlock 102
-  qm stop 102
-  qm destroy 102 --purge --destroy-unreferenced-disks
-
-  qm create 102 --name Immortalwrt
-  qm set 102 --core 2 --memory 2048 
-  qm set 102 --net0 virtio,bridge=vmbr0,firewall=1
-  qm set 102 --scsihw virtio-scsi-pci 
-  qm set 102 --scsi0 local:0,import-from=/var/lib/vz/template/iso/immortalwrt-24.10.2-x86-64-generic-ext4-combined.img
-  qm disk resize 102 scsi0 +256M
-  qm set 102 --boot order=scsi0
-  qm set 102 --hostpci0 0000:05:00
-  qm set 102 --hostpci1 0000:06:00
-  qm config 102
-  qm start 102
-'
+  # qm create ${VM_ID} --name ${VM_NAME}
+  # qm set ${VM_ID} --core 2 --memory 2048
+  # qm set ${VM_ID} --net0 virtio,bridge=vmbr0,firewall=1
+  # qm set ${VM_ID} --scsihw virtio-scsi-pci
+  # qm set ${VM_ID} --scsi0 local:0,import-from=/var/lib/vz/template/iso/${IMG}
+  # qm disk resize ${VM_ID} scsi0 +256M
+  # qm set ${VM_ID} --boot order=scsi0
+  # qm set ${VM_ID} --hostpci0 0000:05:00
+  # qm set ${VM_ID} --hostpci1 0000:06:00
+  # qm config ${VM_ID}
+  # qm start ${VM_ID}
+EOF
 ```
 
 ```bash

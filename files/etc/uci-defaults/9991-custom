@@ -44,6 +44,7 @@ fi
 # https://mirrors.pku.edu.cn/immortalwrt/releases/24.10.2/packages/x86_64/luci
 sed -i 's_downloads.openwrt.org_mirrors.pku.edu.cn/openwrt_' /etc/opkg/distfeeds.conf
 sed -i 's_downloads.immortalwrt.org_mirrors.pku.edu.cn/immortalwrt_' /etc/opkg/distfeeds.conf
+sed -i 's_mirrors.vsean.net/openwrt_mirrors.pku.edu.cn/immortalwrt_' /etc/opkg/distfeeds.conf
 
 echo '============= uci-default base =============='
 uci -q batch <<-EOF
