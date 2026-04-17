@@ -1,13 +1,15 @@
 #!/bin/sh
 
 echo '============= build.sh =============='
-: "${BUD_PLATFORM:=openwrt}"
-: "${BUD_VERSION:=24.10.2}"
+# : "${BUD_PLATFORM:=openwrt}"
+# : "${BUD_VERSION:=25.12.2}"
+: "${BUD_PLATFORM:=immortalwrt}"
+: "${BUD_VERSION:=24.10.5}"
 : "${BUD_TARGET:=x86}"
 : "${BUD_SUBTARGET:=64}"
 : "${BUD_PROFILE:=generic}"
+: "${BUD_TAG_NAME:=${BUD_PLATFORM}-${BUD_TARGET}-${BUD_SUBTARGET}-${BUD_VERSION}-${BUD_PROFILE}}"
 : "${BUD_ROOTFS_PARTSIZE:=512}"
-: "${BUD_TAG_NAME:=${BUD_PLATFORM}-${BUD_VERSION}-${BUD_TARGET}-${BUD_SUBTARGET}-${BUD_PROFILE}}"
 
 if [ "$BUD_PLATFORM" = "openwrt" ]; then
   BUD_IMG_NAME="${BUD_PLATFORM}/imagebuilder:${BUD_TARGET}-${BUD_SUBTARGET}-${BUD_VERSION}"
@@ -21,9 +23,9 @@ BUD_VERSION=${BUD_VERSION}
 BUD_TARGET=${BUD_TARGET}
 BUD_SUBTARGET=${BUD_SUBTARGET}
 BUD_PROFILE=${BUD_PROFILE}
-BUD_ROOTFS_PARTSIZE=${BUD_ROOTFS_PARTSIZE}
 BUD_TAG_NAME=${BUD_TAG_NAME}
 BUD_IMG_NAME=${BUD_IMG_NAME}
+BUD_ROOTFS_PARTSIZE=${BUD_ROOTFS_PARTSIZE}
 EOF
 
 echo '============= build.sh .env =============='
@@ -43,7 +45,6 @@ echo $WorkingDir
 
 mkdir -p ./bin
 sudo chown -R 1000:1000 ./
-ls -al ./
 
 docker run --rm \
   -u 1000:1000 \

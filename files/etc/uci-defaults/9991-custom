@@ -3,48 +3,30 @@
 . /etc/config/.env
 . /etc/config/.cnf
 
-echo '============= uci-default opkg =============='
-# 备份 
-# /etc/opkg
-# ├── customfeeds.conf
-# ├── distfeeds.conf
-# └── keys
-#     └── d310c6f2833e97f7
-cp -rf /etc/opkg /etc/opkg.bak
-cp -rf /etc/opkg.conf /etc/opkg.conf.bak
-if [ "$BUD_PLATFORM" = "openwrt" ]; then
-  # TODO 添加 immortalwrt 到 key
-  # 禁用签名验证
-  sed -i 's/^option check_signature/# option check_signature/' /etc/opkg.conf
+echo '============= uci-default repositories =============='
+# 24 使用 opkg 
+# 25 使用 apk
 
-  # 添加 immortalwrt 的 luci 源
-  IMMORTAL_LINE=$(grep '^src/gz openwrt_luci' "/etc/opkg/distfeeds.conf" | \
-    sed 's|^src/gz openwrt_luci|src/gz immortalwrt_luci|' | \
-    sed 's|downloads.openwrt.org|downloads.immortalwrt.org|')
-  awk -v new_line="$IMMORTAL_LINE" '
-    {
-      print $0
-      if ($0 ~ /^src\/gz openwrt_telephony/) {
-        print new_line
-      }
-    }
-  ' "/etc/opkg/distfeeds.conf" > "/etc/opkg/distfeeds.conf.tmp" && mv "/etc/opkg/distfeeds.conf.tmp" "/etc/opkg/distfeeds.conf"
+if [ -x "$(command -v opkg)" ]; then
+  PKG_MGR="opkg"
 else
-  :
+  PKG_MGR="apk"
 fi
 
-# 北大源
-# https://mirrors.pku.edu.cn/Help/Openwrt
-# https://mirrors.pku.edu.cn/Help/immortalwrt
-# 清华源
-# https://mirrors.tuna.tsinghua.edu.cn/help/openwrt/
-# https://downloads.openwrt.org/releases/24.10.2/packages/x86_64/luci
-# https://mirrors.pku.edu.cn/openwrt/releases/24.10.2/packages/x86_64/luci
-# https://downloads.immortalwrt.org/releases/24.10.2/packages/x86_64/luci
-# https://mirrors.pku.edu.cn/immortalwrt/releases/24.10.2/packages/x86_64/luci
-sed -i 's_downloads.openwrt.org_mirrors.pku.edu.cn/openwrt_' /etc/opkg/distfeeds.conf
-sed -i 's_downloads.immortalwrt.org_mirrors.pku.edu.cn/immortalwrt_' /etc/opkg/distfeeds.conf
-sed -i 's_mirrors.vsean.net/openwrt_mirrors.pku.edu.cn/immortalwrt_' /etc/opkg/distfeeds.conf
+file_list="
+/etc/opkg/distfeeds.conf
+/etc/apk/repositories.d/distfeeds.list
+"
+for file in $file_list; do
+  echo $file
+  if [ -f "$file" ]; then
+    cp "$file" "${file}.bak"
+    sed -i 's_https\?://downloads.openwrt.org_https://mirrors.cernet.edu.cn/openwrt_' "$file"
+    sed -i 's_https\?://downloads.immortalwrt.org_https://mirrors.cernet.edu.cn/immortalwrt_' "$file"
+    sed -i 's_https\?://mirrors.vsean.net/openwrt_https://mirrors.cernet.edu.cn/immortalwrt_' "$file"
+    cat $file
+  fi
+done
 
 echo '============= uci-default base =============='
 uci -q batch <<-EOF
@@ -66,6 +48,8 @@ if [ -n "$CNF_ROOT_PASSWD" ]; then
 fi
 
 echo '============= uci-default network =============='
+# /etc/config/network
+# uci show network
 # 网卡信息
 ifnames=""
 for iface in /sys/class/net/*; do
@@ -76,11 +60,12 @@ for iface in /sys/class/net/*; do
   fi
 done
 count=$(echo "$ifnames" | awk '{print NF}')
-echo "count=$count"
-echo "interfaces:$ifnames"
+echo "count: $count"
+echo "interfaces: $ifnames"
 
 lan_ifname=""
 wan_ifname=""
+# 只有一个网卡 || 测试模式下，所有网卡作 lan 口
 if [ "$count" -eq 1 ] || [ "$CNF_NET_MODE" = "test" ]; then
   lan_ifname=$ifnames
 elif [ "$count" -gt 1 ]; then

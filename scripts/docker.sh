@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # https://downloads.immortalwrt.org/releases/24.10.2/targets/x86/64/profiles.json
 # https://downloads.immortalwrt.org/releases/24.10.2/packages/x86_64/
@@ -6,6 +6,9 @@
 # https://downloads.openwrt.org/releases/24.10.2/packages/x86_64/
 
 : <<'COMMENT'
+make package_depends PACKAGE="<pkg>"
+make package_whatdepends PACKAGE="<pkg>"
+
 luci
   Depends: libc, luci-light, luci-app-package-manager
 luci-light
@@ -14,90 +17,126 @@ luci-app-package-manager
   Depends: libc, luci-base
 COMMENT
 
-echo '============= docker.sh repositories.conf =============='
-cp repositories.conf repositories.conf.bak
-if [ "$BUD_PLATFORM" = "openwrt" ]; then
-  # TODO 添加 immortalwrt 到 key
-  # 禁用签名验证
-  sed -i 's/^option check_signature/# option check_signature/' repositories.conf
+echo '============= docker.sh repositories =============='
+# 24 使用 opkg 
+# 25 使用 apk
 
-  # 添加 immortalwrt 的 luci 源
-  IMMORTAL_LINE=$(grep '^src/gz openwrt_luci' "repositories.conf" | \
-    sed 's|^src/gz openwrt_luci|src/gz immortalwrt_luci|' | \
-    sed 's|downloads.openwrt.org|downloads.immortalwrt.org|')
-  awk -v new_line="$IMMORTAL_LINE" '
-    {
-      print $0
-      if ($0 ~ /^src\/gz openwrt_telephony/) {
-        print new_line
-      }
-    }
-  ' "repositories.conf" > "repositories.conf.tmp" && mv "repositories.conf.tmp" "repositories.conf"
-else
-  :
-fi
+# 清华源
+# https://mirrors.tuna.tsinghua.edu.cn/help/openwrt/
 
 # 北大源
 # https://mirrors.pku.edu.cn/Help/Openwrt
 # https://mirrors.pku.edu.cn/Help/immortalwrt
-# 清华源
-# https://mirrors.tuna.tsinghua.edu.cn/help/openwrt/
+
 # https://downloads.openwrt.org/releases/24.10.2/packages/x86_64/luci
 # https://mirrors.pku.edu.cn/openwrt/releases/24.10.2/packages/x86_64/luci
+
 # https://downloads.immortalwrt.org/releases/24.10.2/packages/x86_64/luci
 # https://mirrors.pku.edu.cn/immortalwrt/releases/24.10.2/packages/x86_64/luci
-sed -i 's_downloads.openwrt.org_mirrors.pku.edu.cn/openwrt_' repositories.conf
-sed -i 's_downloads.immortalwrt.org_mirrors.pku.edu.cn/immortalwrt_' repositories.conf
+
+# MirrorZ 
+# https://help.mirrors.cernet.edu.cn/openwrt/
+# https://help.mirrors.cernet.edu.cn/immortalwrt/
+
+if [ -f "repositories.conf" ]; then
+  PKG_MGR="opkg"
+else
+  PKG_MGR="apk"
+fi
+
+file_list=(
+  "repositories.conf"
+  "repositories"
+)
+for file in "${file_list[@]}"; do
+  echo $file
+  if [ -f "$file" ]; then
+    cp "$file" "${file}.bak"
+    sed -i 's_https\?://downloads.openwrt.org_https://mirrors.cernet.edu.cn/openwrt_' "$file"
+    sed -i 's_https\?://downloads.immortalwrt.org_https://mirrors.cernet.edu.cn/immortalwrt_' "$file"
+    sed -i 's_https\?://mirrors.vsean.net/openwrt_https://mirrors.cernet.edu.cn/immortalwrt_' "$file"
+    cat $file
+  fi
+done
 
 echo '============= docker.sh base =============='
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci luci-compat"
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-i18n-base-zh-cn luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn"
+PACKAGES=(
+  curl
+  tree
+  pciutils
+  fdisk
+  block-mount
+  resize2fs
+  losetup
+  iperf3
+  socat
+  openssh-sftp-server
+)
 
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }curl tree"
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }pciutils"
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }fdisk block-mount"
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }resize2fs losetup"
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }iperf3"
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }socat"
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }openssh-sftp-server"
+PACKAGES+=(
+  luci
+  luci-compat
+  luci-i18n-base-zh-cn
+  luci-i18n-firewall-zh-cn
+  luci-i18n-package-manager-zh-cn
+  luci-i18n-filemanager-zh-cn
+  luci-i18n-ttyd-zh-cn
+)
 
-# OpenClash 依赖 dnsmasq-full 和 dnsmasq 有冲突
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }dnsmasq-full -dnsmasq"
-
-# luci-app-diskman
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-app-diskman luci-i18n-diskman-zh-cn"
-
-# luci-app-ttyd
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-app-ttyd luci-i18n-ttyd-zh-cn"
+# openclash 依赖 dnsmasq-full 和 dnsmasq 有冲突
+PACKAGES+=(
+  dnsmasq-full
+  -dnsmasq
+)
 
 # luci-app-ddns
 # /usr/bin/ddns --help
 # https://github.com/openwrt/luci/tree/master/applications/luci-app-ddns
 # https://github.com/openwrt/packages/blob/master/net/ddns-scripts
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-app-ddns luci-i18n-ddns-zh-cn"
+PACKAGES+=(
+  luci-i18n-ddns-zh-cn
+)
 
-# luci-app-arpbind
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-app-arpbind luci-i18n-arpbind-zh-cn"
-
-echo '============= docker.sh openclash =============='
-# https://github.com/vernesong/OpenClash
-# https://wiki.metacubex.one/
-# 下载 ipk
-OPENCLASH_VERSION_URL="https://gh-proxy.com/https://raw.githubusercontent.com/vernesong/OpenClash/package/master/version"
-OPENCLASH_VERSION=$(curl -s "$OPENCLASH_VERSION_URL" | head -n 1 | tr -d 'v')
-OPENCLASH_IPK_URL="https://gh-proxy.com/https://raw.githubusercontent.com/vernesong/OpenClash/package/master/luci-app-openclash_${OPENCLASH_VERSION}_all.ipk"
-curl -sSL -o "packages/luci-app-openclash_all.ipk" "$OPENCLASH_IPK_URL"
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }luci-app-openclash"
-
-echo '============= docker.sh adguardhome =============='
 # https://github.com/openwrt/packages/tree/master/net/adguardhome
-BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }adguardhome"
+PACKAGES+=(
+  adguardhome
+)
+
+if [[ "$BUD_PLATFORM" == "immortalwrt" ]]; then
+  # luci-app-diskman
+  PACKAGES+=(
+    luci-i18n-diskman-zh-cn
+  )
+
+  # luci-app-arpbind
+  PACKAGES+=(
+    luci-i18n-arpbind-zh-cn
+  )
+
+  # luci-app-openclash
+  # https://wiki.metacubex.one/
+  # https://github.com/vernesong/OpenClash
+  PACKAGES+=(
+    luci-app-openclash
+  )
+fi
+
+if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
+  :
+fi
+
+BUD_PACKAGES="${BUD_PACKAGES:+$BUD_PACKAGES }${PACKAGES[*]}"
+
+echo $BUD_PACKAGES
+
+ls -lah ./packages
 
 echo '============= docker.sh make =============='
-id
-ls -la $(pwd)/openwrt
 
-mkdir -p $(pwd)/openwrt/bin/${BUD_TAG_NAME}
+id
+
+mkdir -p ./openwrt/bin/${BUD_TAG_NAME}
+
 make image \
   BIN_DIR="$(pwd)/openwrt/bin/${BUD_TAG_NAME}" \
   FILES="$(pwd)/openwrt/files" \
@@ -105,14 +144,14 @@ make image \
   PACKAGES="${BUD_PACKAGES}" \
   ROOTFS_PARTSIZE="${BUD_ROOTFS_PARTSIZE}"
 
-ls -la $(pwd)/openwrt/bin/${BUD_TAG_NAME}
+ls -la ./openwrt/bin/${BUD_TAG_NAME}
 
 echo '============= docker.sh info =============='
-cat << EOF > $(pwd)/openwrt/bin/${BUD_TAG_NAME}/info.md
+cat << EOF > ./openwrt/bin/${BUD_TAG_NAME}/info.md
 ## .env
-$(cat $(pwd)/openwrt/files/etc/config/.env)
+$(cat ./openwrt/files/etc/config/.env)
 BUD_PACKAGES=${BUD_PACKAGES}
 
 ## .cnf
-$(cat $(pwd)/openwrt/files/etc/config/.cnf)
+$(cat ./openwrt/files/etc/config/.cnf)
 EOF
