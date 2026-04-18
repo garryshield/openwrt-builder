@@ -5,6 +5,12 @@
 # https://downloads.openwrt.org/releases/24.10.2/targets/x86/64/profiles.json
 # https://downloads.openwrt.org/releases/24.10.2/packages/x86_64/
 
+echo '============= docker.sh info =============='
+id
+
+curl -s https://ipinfo.io
+echo
+
 : <<'COMMENT'
 make package_depends PACKAGE="<pkg>"
 make package_whatdepends PACKAGE="<pkg>"
@@ -133,8 +139,6 @@ ls -lah ./packages
 
 echo '============= docker.sh make =============='
 
-id
-
 mkdir -p ./openwrt/bin/${BUD_TAG_NAME}
 
 make image \
@@ -143,8 +147,6 @@ make image \
   PROFILE="${BUD_PROFILE}" \
   PACKAGES="${BUD_PACKAGES}" \
   ROOTFS_PARTSIZE="${BUD_ROOTFS_PARTSIZE}"
-
-ls -la ./openwrt/bin/${BUD_TAG_NAME}
 
 echo '============= docker.sh info =============='
 cat << EOF > ./openwrt/bin/${BUD_TAG_NAME}/info.md
@@ -155,3 +157,5 @@ BUD_PACKAGES=${BUD_PACKAGES}
 ## .cnf
 $(cat ./openwrt/files/etc/config/.cnf)
 EOF
+
+ls -lah ./openwrt/bin/${BUD_TAG_NAME}

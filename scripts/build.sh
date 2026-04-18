@@ -1,10 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
-echo '============= build.sh =============='
-# : "${BUD_PLATFORM:=openwrt}"
+echo '============= build.sh info =============='
+id
+
+curl -s https://ipinfo.io
+echo
+
+echo '============= build.sh init =============='
+: "${BUD_PLATFORM:=openwrt}"
 # : "${BUD_VERSION:=25.12.2}"
-: "${BUD_PLATFORM:=immortalwrt}"
-: "${BUD_VERSION:=24.10.5}"
+# : "${BUD_PLATFORM:=immortalwrt}"
+: "${BUD_VERSION:=24.10.6}"
 : "${BUD_TARGET:=x86}"
 : "${BUD_SUBTARGET:=64}"
 : "${BUD_PROFILE:=generic}"
@@ -42,9 +48,6 @@ WorkingDir=$(docker image inspect ${BUD_IMG_NAME} --format '{{.Config.WorkingDir
 : "${WorkingDir:=/}"
 
 echo $WorkingDir
-
-mkdir -p ./bin
-sudo chown -R 1000:1000 ./
 
 docker run --rm \
   -u 1000:1000 \
