@@ -1,5 +1,2 @@
-/bin/*
-!/bin/
-!/bin/.gitkeep
-
+/bin/
 /files/etc/config/.env

@@ -48,6 +48,7 @@ WorkingDir=$(docker image inspect ${BUD_IMG_NAME} --format '{{.Config.WorkingDir
 : "${WorkingDir:=/}"
 
 echo $WorkingDir
+ls -lah $WorkingDir
 
 mkdir -p ./bin
 sudo chown -R 1000:1000 ./bin
