@@ -49,6 +49,9 @@ WorkingDir=$(docker image inspect ${BUD_IMG_NAME} --format '{{.Config.WorkingDir
 
 echo $WorkingDir
 
+mkdir -p ./bin
+sudo chown -R 1000:1000 ./bin
+
 docker run --rm \
   -u 1000:1000 \
   --env-file ./files/etc/config/.env \
